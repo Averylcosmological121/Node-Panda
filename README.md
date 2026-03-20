@@ -51,10 +51,10 @@ cd build
 
 ### 3. Generar el proyecto con CMake
 
-Abre una **Developer PowerShell for VS 2022** (o 2019) — búscala en el menú Inicio — y ejecuta desde dentro de la carpeta `build`:
+Abre una **Developer PowerShell for VS 2026** — búscala en el menú Inicio — y ejecuta desde dentro de la carpeta `build`:
 
 ```powershell
-cmake .. -G "Visual Studio 17 2022"
+cmake .. -G "Visual Studio 18 2026"
 ```
 
 > Si usas Visual Studio **2019**, cambia el generador:
