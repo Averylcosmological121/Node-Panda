@@ -38,7 +38,7 @@ Gestor personal de notas enlazadas con grafo visual interactivo. Construido desd
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/TU_USUARIO/NodePanda.git
+git clone https://github.com/charbelochoa/NodePanda.git
 cd NodePanda
 ```
 
