@@ -169,7 +169,7 @@ cd ..
 Remove-Item -Recurse -Force build
 mkdir build
 cd build
-cmake .. -G "Visual Studio 17 2022"
+cmake .. -G "Visual Studio 18 2026"
 ```
 
 **`panda.png` no aparece**
@@ -194,4 +194,9 @@ Haz clic en otra nota y vuelve. Si el problema persiste, ve a **Archivo → Rees
 
 ## Licencia
 
-Proyecto personal / educativo. Sin licencia formal.
+Copyright (c) 2026 Charbel Ochoa 
+
+All rights reserved.
+
+Este proyecto es personal/educativo. 
+No se permite el uso, copia, modificación o distribución del código sin permiso explícito del autor.
