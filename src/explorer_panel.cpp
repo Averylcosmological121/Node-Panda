@@ -1,6 +1,7 @@
 
 
 #include "explorer_panel.h"
+#include "plugin_manager.h"
 #include "imgui.h"
 #include <algorithm>
 #include <map>
@@ -223,6 +224,7 @@ void ExplorerPanel::render(App& app) {
                 nm.createNote(name, std::string(m_newNoteFolder));
                 app.selectedNoteId    = name;
                 app.graphNeedsRebuild = true;
+                app.getPluginManager().callOnNoteCreate(name);
             }
             m_showNewNoteDialog = false;
             ImGui::CloseCurrentPopup();

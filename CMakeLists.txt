@@ -112,6 +112,18 @@ set(SOURCES
     src/memory_engine.cpp
     src/memory_panel.cpp
     src/command_panel.cpp
+    src/plugin_manager.cpp
+    src/plugin_panel.cpp
+    src/query_engine.cpp
+    src/query_panel.cpp
+    src/graph_analytics.cpp
+    src/analytics_panel.cpp
+    src/srs_engine.cpp
+    src/srs_panel.cpp
+    src/git_manager.cpp
+    src/git_panel.cpp
+    src/http_server.cpp
+    src/http_panel.cpp
 )
 
 # Icono y recursos de Windows
@@ -143,14 +155,25 @@ target_link_libraries(NodePanda PRIVATE
 
 # Vincular comdlg32 para el diálogo nativo de archivos (GetOpenFileNameA)
 if(WIN32)
-    target_link_libraries(NodePanda PRIVATE comdlg32 psapi)
+    target_link_libraries(NodePanda PRIVATE comdlg32 psapi ws2_32)
 endif()
 
 # Copiar la carpeta de datos al directorio de salida
 add_custom_command(TARGET NodePanda POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:NodePanda>/data/notas"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:NodePanda>/data/plugins"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/data/panda.png"
         "$<TARGET_FILE_DIR:NodePanda>/data/panda.png"
     COMMENT "Copiando assets de datos al directorio de salida"
 )
+
+# Copiar plugins de ejemplo al directorio de salida
+if(EXISTS "${CMAKE_SOURCE_DIR}/data/plugins")
+    add_custom_command(TARGET NodePanda POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/data/plugins"
+            "$<TARGET_FILE_DIR:NodePanda>/data/plugins"
+        COMMENT "Copiando plugins al directorio de salida"
+    )
+endif()

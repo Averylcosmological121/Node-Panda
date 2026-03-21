@@ -5,6 +5,7 @@
 #include "texture_manager.h"
 #include "markdown_parser.h"
 #include "lua_manager.h"
+#include "plugin_manager.h"
 #include "imgui.h"
 
 #include <cstring>
@@ -194,6 +195,7 @@ void EditorPanel::render(App& app) {
         note->parseLinks();
         note->parseTitle();
         app.graphNeedsRebuild = true;
+        app.getPluginManager().callOnNoteSave(note->id);
     }
     ImGui::PopStyleColor(3);
     if (ImGui::IsItemHovered())

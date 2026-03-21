@@ -15,7 +15,18 @@
 #include "lua_console.h"
 #include "memory_panel.h"
 #include "command_panel.h"
+#include "plugin_panel.h"
+#include "query_panel.h"
+#include "analytics_panel.h"
+#include "srs_panel.h"
+#include "git_panel.h"
+#include "http_panel.h"
 #include "ai_exporter.h"
+
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+}
 
 #include "imgui.h"
 #include "imgui_internal.h"          
@@ -64,6 +75,12 @@ App::App()
     , m_luaConsole(new LuaConsole())
     , m_memoryPanel(new MemoryPanel())
     , m_commandPanel(new CommandPanel())
+    , m_pluginPanel(new PluginPanel())
+    , m_queryPanel(new QueryPanel())
+    , m_analyticsPanel(new AnalyticsPanel())
+    , m_srsPanel(new SRSPanel())
+    , m_gitPanel(new GitPanel())
+    , m_httpPanel(new HttpPanel())
 {}
 
 App::~App() {
@@ -74,6 +91,12 @@ App::~App() {
     delete m_luaConsole;
     delete m_memoryPanel;
     delete m_commandPanel;
+    delete m_pluginPanel;
+    delete m_queryPanel;
+    delete m_analyticsPanel;
+    delete m_srsPanel;
+    delete m_gitPanel;
+    delete m_httpPanel;
 }
 
 
@@ -197,10 +220,16 @@ static void setupDockLayout(ImGuiID dockspaceId, ImVec2 size) {
     ImGui::DockBuilderDockWindow("Explorador de Notas", leftId);
     ImGui::DockBuilderDockWindow("Editor de Notas",    centerId);
     ImGui::DockBuilderDockWindow("Consola Lua",        centerBottomId);
+    ImGui::DockBuilderDockWindow("Motor de Consultas",  centerBottomId); // tab junto a Consola
     ImGui::DockBuilderDockWindow("Grafo de Nodos",     rightId);
     ImGui::DockBuilderDockWindow("Backlinks",           rightBottomId);
     ImGui::DockBuilderDockWindow("Motor de Memoria",    rightBottomId); // tab junto a Backlinks
+    ImGui::DockBuilderDockWindow("Analisis de Grafo",   rightBottomId); // tab junto a Backlinks
     ImGui::DockBuilderDockWindow("Centro de Mando",     leftId);        // tab junto a Explorador
+    ImGui::DockBuilderDockWindow("Gestor de Plugins",   leftId);        // tab junto a Explorador
+    ImGui::DockBuilderDockWindow("Repeticion Espaciada", leftId);       // tab junto a Explorador
+    ImGui::DockBuilderDockWindow("Control de Versiones", leftId);       // tab junto a Explorador
+    ImGui::DockBuilderDockWindow("Servidor API",         leftId);       // tab junto a Explorador
 
     ImGui::DockBuilderFinish(dockspaceId);
 }
@@ -292,6 +321,13 @@ bool App::init(const char* title, int width, int height) {
     m_fileWatcher.start(notesDir);
 
     m_luaManager.init(this);
+    m_pluginManager.init(this);
+
+    // Inicializar Git en el directorio de notas
+    m_gitManager.init(notesDir);
+
+    // Iniciar servidor HTTP local
+    m_httpServer.start(this, 8042);
 
     graphNeedsRebuild = true;
     return true;
@@ -352,6 +388,10 @@ void App::run() {
             if (selectedNoteId != m_prevSelectedNoteId) {
                 m_prevSelectedNoteId = selectedNoteId;
                 graphNeedsRebuild = true;
+                // Notificar a plugins que se abrió una nota
+                if (!selectedNoteId.empty()) {
+                    m_pluginManager.callOnNoteOpen(selectedNoteId);
+                }
             }
             if (graphNeedsRebuild) {
                 rebuildGraph();
@@ -367,6 +407,15 @@ void App::run() {
             m_luaConsole->render(*this);
             m_memoryPanel->render(*this);
             m_commandPanel->render(*this);
+            m_pluginPanel->render(*this);
+            m_queryPanel->render(*this);
+            m_analyticsPanel->render(*this);
+            m_srsPanel->render(*this);
+            m_gitPanel->render(*this);
+            m_httpPanel->render(*this);
+
+            // Llamar on_frame de todos los plugins activos
+            m_pluginManager.callOnFrame();
 
             if (m_showDemoWindow) {
                 ImGui::ShowDemoWindow(&m_showDemoWindow);
@@ -389,8 +438,15 @@ void App::run() {
 
 
 void App::shutdown() {
+    m_httpServer.stop();
+    m_pluginManager.shutdown();
     m_fileWatcher.stop();
     m_noteManager.saveAllDirty();
+
+    // Auto-commit final al cerrar
+    if (m_gitManager.isAvailable() && m_gitManager.hasChanges()) {
+        m_gitManager.autoCommit("[autosave] Cierre de Node Panda");
+    }
     m_imageCache.clear();
     m_textureManager.clear();
 
@@ -446,6 +502,56 @@ void App::renderMenuBar() {
 
     if (ImGui::BeginMenu("Vista")) {
         ImGui::MenuItem("Demo ImGui", nullptr, &m_showDemoWindow);
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Herramientas")) {
+        if (ImGui::MenuItem("Guardar Version (Git)")) {
+            if (m_gitManager.isAvailable()) {
+                m_noteManager.saveAllDirty();
+                m_gitManager.autoCommit();
+            }
+        }
+        ImGui::Separator();
+        if (ImGui::MenuItem("Recalcular Analiticas del Grafo")) {
+            m_graphAnalytics.analyze(m_graph);
+        }
+        if (ImGui::MenuItem("Refrescar Cola de Repaso (SRS)")) {
+            m_srsEngine.buildQueue(m_noteManager);
+        }
+        ImGui::Separator();
+        bool serverRunning = m_httpServer.isRunning();
+        if (ImGui::MenuItem(serverRunning ? "Detener Servidor API" : "Iniciar Servidor API")) {
+            if (serverRunning) m_httpServer.stop();
+            else m_httpServer.start(this, 8042);
+        }
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Plugins")) {
+        // Menú items registrados por plugins
+        auto& menuItems = m_pluginManager.getMenuItems();
+        if (menuItems.empty()) {
+            ImGui::MenuItem("(sin items de plugins)", nullptr, false, false);
+        } else {
+            for (const auto& item : menuItems) {
+                if (ImGui::MenuItem(item.label.c_str())) {
+                    if (item.luaState && item.callbackRef != -1) {
+                        lua_rawgeti(item.luaState, LUA_REGISTRYINDEX, item.callbackRef);
+                        if (lua_pcall(item.luaState, 0, 0, 0) != LUA_OK) {
+                            const char* err = lua_tostring(item.luaState, -1);
+                            fprintf(stderr, "[Plugin] Error en menu item '%s': %s\n",
+                                    item.label.c_str(), err ? err : "unknown");
+                            lua_pop(item.luaState, 1);
+                        }
+                    }
+                }
+            }
+        }
+        ImGui::Separator();
+        if (ImGui::MenuItem("Reescanear Plugins")) {
+            m_pluginManager.rescanPlugins();
+        }
         ImGui::EndMenu();
     }
 
@@ -885,6 +991,7 @@ void App::renderHubBienvenida() {
                     selectedNoteId    = note->id;
                     graphNeedsRebuild = true;
                     currentState      = AppState::ENTORNO_NOTAS;
+                    m_pluginManager.callOnNoteCreate(note->id);
                 }
                 ImGui::CloseCurrentPopup();
             }

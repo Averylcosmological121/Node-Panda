@@ -1,0 +1,9 @@
+{
+  "name":        "Tag Browser",
+  "id":          "tag_browser",
+  "version":     "1.0.0",
+  "author":      "NodePanda",
+  "description": "Panel dedicado para navegar y filtrar notas por tags. Muestra frecuencia de cada tag.",
+  "hooks":       ["on_load", "on_frame"],
+  "enabled":     true
+}

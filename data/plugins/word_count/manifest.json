@@ -1,0 +1,9 @@
+{
+  "name":        "Word Count",
+  "id":          "word_count",
+  "version":     "1.0.0",
+  "author":      "NodePanda",
+  "description": "Muestra conteo de palabras, caracteres y tiempo de lectura estimado de la nota activa.",
+  "hooks":       ["on_load", "on_frame"],
+  "enabled":     true
+}

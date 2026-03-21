@@ -1,0 +1,9 @@
+{
+  "name":        "Stats Dashboard",
+  "id":          "stats_dashboard",
+  "version":     "1.0.0",
+  "author":      "NodePanda",
+  "description": "Panel con estadisticas del vault en tiempo real: notas, palabras, conexiones.",
+  "hooks":       ["on_load", "on_frame"],
+  "enabled":     true
+}

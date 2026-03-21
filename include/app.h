@@ -8,6 +8,12 @@
 #include "performance_metrics.h"
 #include "lua_manager.h"
 #include "memory_engine.h"
+#include "plugin_manager.h"
+#include "query_engine.h"
+#include "graph_analytics.h"
+#include "srs_engine.h"
+#include "git_manager.h"
+#include "http_server.h"
 
 struct GLFWwindow;
 
@@ -19,6 +25,12 @@ namespace nodepanda {
     class LuaConsole;
     class MemoryPanel;
     class CommandPanel;
+    class PluginPanel;
+    class QueryPanel;
+    class AnalyticsPanel;
+    class SRSPanel;
+    class GitPanel;
+    class HttpPanel;
 }
 
 namespace nodepanda {
@@ -46,6 +58,12 @@ public:
     PerformanceMetrics& getPerformanceMetrics() { return m_perfMetrics; }
     LuaManager& getLuaManager() { return m_luaManager; }
     MemoryEngine& getMemoryEngine() { return m_memoryEngine; }
+    PluginManager& getPluginManager() { return m_pluginManager; }
+    QueryEngine& getQueryEngine() { return m_queryEngine; }
+    GraphAnalytics& getGraphAnalytics() { return m_graphAnalytics; }
+    SRSEngine& getSRSEngine() { return m_srsEngine; }
+    GitManager& getGitManager() { return m_gitManager; }
+    HttpServer& getHttpServer() { return m_httpServer; }
 
     std::string selectedNoteId;
     bool        graphNeedsRebuild = true;
@@ -68,6 +86,12 @@ private:
     PerformanceMetrics m_perfMetrics;
     LuaManager m_luaManager;
     MemoryEngine m_memoryEngine;
+    PluginManager m_pluginManager;
+    QueryEngine m_queryEngine;
+    GraphAnalytics m_graphAnalytics;
+    SRSEngine m_srsEngine;
+    GitManager m_gitManager;
+    HttpServer m_httpServer;
 
     ExplorerPanel* m_explorerPanel = nullptr;
     EditorPanel* m_editorPanel = nullptr;
@@ -76,6 +100,12 @@ private:
     LuaConsole*     m_luaConsole     = nullptr;
     MemoryPanel*    m_memoryPanel    = nullptr;
     CommandPanel*   m_commandPanel   = nullptr;
+    PluginPanel*    m_pluginPanel    = nullptr;
+    QueryPanel*     m_queryPanel     = nullptr;
+    AnalyticsPanel* m_analyticsPanel = nullptr;
+    SRSPanel*       m_srsPanel       = nullptr;
+    GitPanel*       m_gitPanel       = nullptr;
+    HttpPanel*      m_httpPanel      = nullptr;
 
     bool m_showDemoWindow = false;
     bool m_showExportResult = false;
